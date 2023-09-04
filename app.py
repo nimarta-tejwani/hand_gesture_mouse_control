@@ -2,6 +2,7 @@ import cv2
 import mediapipe as mp
 import numpy as np
 import pyautogui
+import time
 
 # Initialize MediaPipe Hands
 mp_hands = mp.solutions.hands
@@ -20,6 +21,7 @@ screen_width, screen_height = pyautogui.size()
 click_threshold = 50  # Adjust this value to control the click sensitivity
 click_counter = 0
 is_clicking = False
+last_click_time = 0
 
 while cap.isOpened():
     ret, frame = cap.read()
@@ -52,10 +54,14 @@ while cap.isOpened():
                     click_counter = 0
                 else:
                     click_counter += 1
+                    current_time = time.time()
+                    if click_counter == 2 and current_time - last_click_time < 1:  # Detect a double-click within 1 second
+                        pyautogui.doubleClick()
+                    last_click_time = current_time
             else:
                 if is_clicking:
                     is_clicking = False
-                    if click_counter < 5:  # Adjust the click threshold as needed
+                    if click_counter == 1:  # Perform a single click if there was only one click
                         pyautogui.click()
 
             # Draw hand landmarks on the frame
